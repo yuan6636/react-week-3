@@ -11,6 +11,16 @@ function App() {
   });
 
   const [isAuth, setIsAuth] = useState(false);
+  const [products, setProducts] = useState([]);
+  
+  const getProducts = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/api/${API_PATH}/admin/products`);
+      setProducts(res.data.products);
+    } catch (error) {
+      console.error('取得產品資料失敗: ', error?.response?.data?.message)
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -58,7 +68,7 @@ function App() {
       setIsAuth(false);
       console.error("Token無效或過期: ", error?.response?.data?.message);
     }
-  }
+  };
 
   useEffect(() => {
     (async () => {
@@ -70,6 +80,17 @@ function App() {
     })()
   }, [])
 
+  useEffect(() => {
+    if (isAuth) {
+      (async () => {
+        try {
+          await getProducts();
+        } catch (error) {
+          console.error('取得產品資料失敗: ', error?.response?.data?.message);
+        }
+      })()
+    }
+  }, [isAuth])
 
   return (
     <>
@@ -91,32 +112,37 @@ function App() {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td></td>
-                  <td></td>
-                  <td className="text-end"></td>
-                  <td className="text-end"></td>
-                  <td>
-                    <span className="text-success">啟用</span>
-                    <span>未啟用</span>
-                  </td>
-                  <td>
-                    <div className="btn-group">
-                      <button
-                        type="button"
-                        className="btn btn-outline-primary btn-sm"
-                      >
-                        編輯
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-outline-danger btn-sm"
-                      >
-                        刪除
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                {products.map((product) => (
+                  <tr key={product.id}>
+                    <td>{product.category}</td>
+                    <td>{product.title}</td>
+                    <td>{product.origin_price}</td>
+                    <td>{product.price}</td>
+                    <td>
+                      {product.is_enabled ? (
+                        <span className="text-success">啟用</span>
+                      ) : (
+                        <span>未啟用</span>
+                      )}                      
+                    </td>
+                    <td>
+                      <div className="btn-group">
+                        <button
+                          type="button"
+                          className="btn btn-outline-primary btn-sm"
+                        >
+                          編輯
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-outline-danger btn-sm"
+                        >
+                          刪除
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
