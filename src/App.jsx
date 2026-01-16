@@ -49,28 +49,25 @@ function App() {
   };
 
   const checkAdmin = async () => {
+    try {
+      await axios.post(`${API_BASE}/api/user/check`);
+      setIsAuth(true);
+    } catch (error) {
+      console.error("Token無效或過期: ", error?.response?.data?.message);
+      setIsAuth(false);
+    }
+  };
+
+  useEffect(() => {
     const token = document.cookie
       .split('; ')
       .find((row) => row.startsWith('access_token='))
       ?.split('=')[1];
 
-    if (!token) {
-      setIsAuth(false);
-      return;
-    }
-    try {
+    if (token) {
       axios.defaults.headers.common['Authorization'] = token;
-      await axios.post(`${API_BASE}/api/user/check`);
-      
-      setIsAuth(true);
-
-    } catch (error) {
-      setIsAuth(false);
-      console.error("Token無效或過期: ", error?.response?.data?.message);
     }
-  };
 
-  useEffect(() => {
     (async () => {
       try {
         await checkAdmin();
@@ -119,11 +116,11 @@ function App() {
                     <td>{product.origin_price}</td>
                     <td>{product.price}</td>
                     <td>
-                      {product.is_enabled ? (
-                        <span className="text-success">啟用</span>
-                      ) : (
-                        <span>未啟用</span>
-                      )}                      
+                      <span
+                        className={product.is_enabled ? "text-success" : ""}
+                      >
+                        {product.is_enabled ? "啟用" : "未啟用"}
+                      </span>
                     </td>
                     <td>
                       <div className="btn-group">
