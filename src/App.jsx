@@ -17,7 +17,7 @@ const INITIAL_TEMPLATE_DATA = {
   content: '',
   is_enabled: false,
   imageUrl: '',
-  imagesUrl: [],
+  imagesUrl: []
 };
 
 function App() {
@@ -42,6 +42,45 @@ function App() {
     }
   };
 
+  const updateProduct = async () => {
+    let url;
+    let method;
+
+    if (modalType === 'create') {
+      url = `${API_BASE}/api/${API_PATH}/admin/product`;
+      method = 'post';
+    } else if (modalType === 'edit') {
+      url = `${API_BASE}/api/${API_PATH}/admin/product/${templateData.id}`;
+      method = 'put';
+    }
+
+    // 修正 templateData 資料格式
+    const productData = {
+      data: {
+        ...templateData,
+        origin_price: Number(templateData.origin_price),
+        price: Number(templateData.price),
+        is_enabled: templateData.is_enabled ? 1 : 0,
+        imageUrl: templateData.imageUrl ? templateData.imageUrl : 'https://placehold.net/400x400.png', // 新增預設圖片
+        imagesUrl: templateData.imagesUrl.filter(url => url && url.trim() !== '')
+      }
+    };
+
+    const resMsg = modalType === 'create' ? '新增' : '更新';
+
+    try {
+      await axios[method](url, productData);
+
+      alert(`產品已成功${resMsg}`);
+      closeModal();
+      getProducts();
+    } catch (error) {
+      const errMsg = error.response?.data?.message || error.message;
+      console.error(`產品${resMsg}失敗:`, errMsg);
+      alert(`產品${resMsg}失敗`);
+    }
+  }
+
   const checkAdmin = async () => {
     try {
       await axios.post(`${API_BASE}/api/user/check`);
@@ -54,12 +93,25 @@ function App() {
 
   const openModal = (type, product) => {
     setModalType(type);
-    setTemplateData(prev => ({
+
+    // 清理 product 內空白圖片
+    const cleanedProduct = {
+      ...product,
+      imagesUrl: (product.imagesUrl || []).filter(
+        (url) => url && url.trim() !== ''
+      )
+    };
+
+    setTemplateData((prev) => ({
       ...prev,
-      ...product
+      ...cleanedProduct
     }));
 
     productModalRef.current.show();
+  }
+  
+  const closeModal = () => {
+    productModalRef.current.hide();
   }
 
   const handleInputChange = (e) => {
@@ -86,7 +138,6 @@ function App() {
       newImagesUrl[index] = value;
 
       // 當輸入最後一筆圖片網址時，自動新增一個空白輸入欄
-      console.log(newImagesUrl);
       if (
         value !== '' &&
         index === newImagesUrl.length - 1 &&
@@ -316,7 +367,7 @@ function App() {
           <div className="modal-content border-0">
             <div className="modal-header bg-dark text-white">
               <h5 id="productModalLabel" className="modal-title">
-                <span>新增產品</span>
+                <span>{`${modalType === 'create' ? '新增' : '編輯'}產品`}</span>
               </h5>
               <button
                 type="button"
@@ -509,7 +560,10 @@ function App() {
                         checked={templateData.is_enabled}
                         onChange={(e) => handleModalInputChange(e)}
                       />
-                      <label className="form-check-label" htmlFor="is_enabled">
+                      <label
+                        className="form-check-label"
+                        htmlFor="is_enabled"
+                      >
                         是否啟用
                       </label>
                     </div>
@@ -525,7 +579,11 @@ function App() {
               >
                 取消
               </button>
-              <button type="button" className="btn btn-primary">
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => updateProduct()}
+              >
                 確認
               </button>
             </div>
