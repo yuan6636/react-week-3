@@ -71,13 +71,28 @@ function App() {
     try {
       await axios[method](url, productData);
 
-      alert(`產品已成功${resMsg}`);
+      alert(`產品已成功${resMsg}！`);
       closeModal();
       getProducts();
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       console.error(`產品${resMsg}失敗:`, errMsg);
       alert(`產品${resMsg}失敗`);
+    }
+  }
+
+  const deleteProduct = async (id) => {
+    try {
+      await axios.delete(
+        `${API_BASE}/api/${API_PATH}/admin/product/${id}`,
+      );
+      alert('刪除產品成功！')
+      closeModal();
+      getProducts();
+    } catch (error) {
+      const errMsg = error.response?.data?.message || error.message;
+      console.error('刪除失敗: ', errMsg);
+      alert('刪除失敗');
     }
   }
 
@@ -299,6 +314,7 @@ function App() {
                         <button
                           type="button"
                           className="btn btn-outline-danger btn-sm"
+                          onClick={() => openModal('delete', product)}
                         >
                           刪除
                         </button>
@@ -363,46 +379,63 @@ function App() {
         aria-hidden="true"
         ref={productModalRef}
       >
-        <div className="modal-dialog modal-xl">
-          <div className="modal-content border-0">
-            <div className="modal-header bg-dark text-white">
-              <h5 id="productModalLabel" className="modal-title">
-                <span>{`${modalType === 'create' ? '新增' : '編輯'}產品`}</span>
-              </h5>
-              <button
-                type="button"
-                className="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
+        {modalType === 'delete' ? (
+          <div className="modal-dialog modal-xl">
+            <div className="modal-content border-0">
+              <div className="modal-header bg-danger text-white">
+                <h5 id="productModalLabel" className="modal-title">
+                  <span>刪除產品</span>
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div className="modal-body mt-3">
+                <p className="fs-4">
+                  確定要刪除
+                  <span className="text-danger">{`${templateData.title}`}</span>
+                  嗎？
+                </p>
+              </div>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  取消
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={() => deleteProduct(templateData.id)}
+                >
+                  刪除
+                </button>
+              </div>
             </div>
-            <div className="modal-body">
-              <div className="row">
-                <div className="col-sm-4">
-                  <div className="mb-2">
-                    <div className="mb-3">
-                      <label htmlFor="imageUrl" className="form-label">
-                        輸入圖片網址
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="請輸入圖片連結"
-                        name="imageUrl"
-                        value={templateData.imageUrl}
-                        onChange={(e) => handleModalInputChange(e)}
-                      />
-                    </div>
-                    {templateData.imageUrl && (
-                      <img
-                        className="img-fluid"
-                        src={templateData.imageUrl}
-                        alt={`${templateData.title}圖片`}
-                      />
-                    )}
-                  </div>
-                  {templateData.imagesUrl.map((url, index) => (
-                    <div className="mb-2" key={index}>
+          </div>
+        ) : (
+          <div className="modal-dialog modal-xl">
+            <div className="modal-content border-0">
+              <div className="modal-header bg-dark text-white">
+                <h5 id="productModalLabel" className="modal-title">
+                  <span>{`${modalType === 'create' ? '新增' : '編輯'}產品`}</span>
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div className="modal-body">
+                <div className="row">
+                  <div className="col-sm-4">
+                    <div className="mb-2">
                       <div className="mb-3">
                         <label htmlFor="imageUrl" className="form-label">
                           輸入圖片網址
@@ -411,184 +444,208 @@ function App() {
                           type="text"
                           className="form-control"
                           placeholder="請輸入圖片連結"
-                          value={url}
-                          onChange={(e) =>
-                            handleImageChange(index, e.target.value)
-                          }
+                          name="imageUrl"
+                          value={templateData.imageUrl}
+                          onChange={(e) => handleModalInputChange(e)}
                         />
                       </div>
-                      {url && (
+                      {templateData.imageUrl && (
                         <img
                           className="img-fluid"
-                          src={url}
-                          alt={`副圖-${index}`}
+                          src={templateData.imageUrl}
+                          alt={`${templateData.title}圖片`}
                         />
                       )}
                     </div>
-                  ))}
-                  <div>
-                    <button
-                      className="btn btn-outline-primary btn-sm d-block w-100"
-                      onClick={(e) => handleAddImage(e)}
-                    >
-                      新增圖片
-                    </button>
-                  </div>
-                  <div>
-                    <button
-                      className="btn btn-outline-danger btn-sm d-block w-100"
-                      onClick={(e) => handleRemoveImage(e)}
-                    >
-                      刪除圖片
-                    </button>
-                  </div>
-                </div>
-                <div className="col-sm-8">
-                  <div className="mb-3">
-                    <label htmlFor="title" className="form-label">
-                      標題
-                    </label>
-                    <input
-                      id="title"
-                      type="text"
-                      className="form-control"
-                      placeholder="請輸入標題"
-                      name="title"
-                      value={templateData.title}
-                      onChange={(e) => handleModalInputChange(e)}
-                    />
-                  </div>
-
-                  <div className="row">
-                    <div className="mb-3 col-md-6">
-                      <label htmlFor="category" className="form-label">
-                        分類
-                      </label>
-                      <input
-                        id="category"
-                        type="text"
-                        className="form-control"
-                        placeholder="請輸入分類"
-                        name="category"
-                        value={templateData.category}
-                        onChange={(e) => handleModalInputChange(e)}
-                      />
-                    </div>
-                    <div className="mb-3 col-md-6">
-                      <label htmlFor="unit" className="form-label">
-                        單位
-                      </label>
-                      <input
-                        id="unit"
-                        type="text"
-                        className="form-control"
-                        placeholder="請輸入單位"
-                        name="unit"
-                        value={templateData.unit}
-                        onChange={(e) => handleModalInputChange(e)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="row">
-                    <div className="mb-3 col-md-6">
-                      <label htmlFor="origin_price" className="form-label">
-                        原價
-                      </label>
-                      <input
-                        id="origin_price"
-                        type="number"
-                        min="0"
-                        className="form-control"
-                        placeholder="請輸入原價"
-                        name="origin_price"
-                        value={templateData.origin_price}
-                        onChange={(e) => handleModalInputChange(e)}
-                      />
-                    </div>
-                    <div className="mb-3 col-md-6">
-                      <label htmlFor="price" className="form-label">
-                        售價
-                      </label>
-                      <input
-                        id="price"
-                        type="number"
-                        min="0"
-                        className="form-control"
-                        placeholder="請輸入售價"
-                        name="price"
-                        value={templateData.price}
-                        onChange={(e) => handleModalInputChange(e)}
-                      />
-                    </div>
-                  </div>
-                  <hr />
-
-                  <div className="mb-3">
-                    <label htmlFor="description" className="form-label">
-                      產品描述
-                    </label>
-                    <textarea
-                      id="description"
-                      className="form-control"
-                      placeholder="請輸入產品描述"
-                      name="description"
-                      value={templateData.description}
-                      onChange={(e) => handleModalInputChange(e)}
-                    ></textarea>
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="content" className="form-label">
-                      說明內容
-                    </label>
-                    <textarea
-                      id="content"
-                      className="form-control"
-                      placeholder="請輸入說明內容"
-                      name="content"
-                      value={templateData.content}
-                      onChange={(e) => handleModalInputChange(e)}
-                    ></textarea>
-                  </div>
-                  <div className="mb-3">
-                    <div className="form-check">
-                      <input
-                        id="is_enabled"
-                        name="is_enabled"
-                        className="form-check-input"
-                        type="checkbox"
-                        checked={templateData.is_enabled}
-                        onChange={(e) => handleModalInputChange(e)}
-                      />
-                      <label
-                        className="form-check-label"
-                        htmlFor="is_enabled"
+                    {templateData.imagesUrl.map((url, index) => (
+                      <div className="mb-2" key={index}>
+                        <div className="mb-3">
+                          <label htmlFor="imageUrl" className="form-label">
+                            輸入圖片網址
+                          </label>
+                          <input
+                            type="text"
+                            className="form-control"
+                            placeholder="請輸入圖片連結"
+                            value={url}
+                            onChange={(e) =>
+                              handleImageChange(index, e.target.value)
+                            }
+                          />
+                        </div>
+                        {url && (
+                          <img
+                            className="img-fluid"
+                            src={url}
+                            alt={`副圖-${index}`}
+                          />
+                        )}
+                      </div>
+                    ))}
+                    <div>
+                      <button
+                        className="btn btn-outline-primary btn-sm d-block w-100"
+                        onClick={(e) => handleAddImage(e)}
                       >
-                        是否啟用
+                        新增圖片
+                      </button>
+                    </div>
+                    <div>
+                      <button
+                        className="btn btn-outline-danger btn-sm d-block w-100"
+                        onClick={(e) => handleRemoveImage(e)}
+                      >
+                        刪除圖片
+                      </button>
+                    </div>
+                  </div>
+                  <div className="col-sm-8">
+                    <div className="mb-3">
+                      <label htmlFor="title" className="form-label">
+                        標題
                       </label>
+                      <input
+                        id="title"
+                        type="text"
+                        className="form-control"
+                        placeholder="請輸入標題"
+                        name="title"
+                        value={templateData.title}
+                        onChange={(e) => handleModalInputChange(e)}
+                      />
+                    </div>
+
+                    <div className="row">
+                      <div className="mb-3 col-md-6">
+                        <label htmlFor="category" className="form-label">
+                          分類
+                        </label>
+                        <input
+                          id="category"
+                          type="text"
+                          className="form-control"
+                          placeholder="請輸入分類"
+                          name="category"
+                          value={templateData.category}
+                          onChange={(e) => handleModalInputChange(e)}
+                        />
+                      </div>
+                      <div className="mb-3 col-md-6">
+                        <label htmlFor="unit" className="form-label">
+                          單位
+                        </label>
+                        <input
+                          id="unit"
+                          type="text"
+                          className="form-control"
+                          placeholder="請輸入單位"
+                          name="unit"
+                          value={templateData.unit}
+                          onChange={(e) => handleModalInputChange(e)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="row">
+                      <div className="mb-3 col-md-6">
+                        <label htmlFor="origin_price" className="form-label">
+                          原價
+                        </label>
+                        <input
+                          id="origin_price"
+                          type="number"
+                          min="0"
+                          className="form-control"
+                          placeholder="請輸入原價"
+                          name="origin_price"
+                          value={templateData.origin_price}
+                          onChange={(e) => handleModalInputChange(e)}
+                        />
+                      </div>
+                      <div className="mb-3 col-md-6">
+                        <label htmlFor="price" className="form-label">
+                          售價
+                        </label>
+                        <input
+                          id="price"
+                          type="number"
+                          min="0"
+                          className="form-control"
+                          placeholder="請輸入售價"
+                          name="price"
+                          value={templateData.price}
+                          onChange={(e) => handleModalInputChange(e)}
+                        />
+                      </div>
+                    </div>
+                    <hr />
+
+                    <div className="mb-3">
+                      <label htmlFor="description" className="form-label">
+                        產品描述
+                      </label>
+                      <textarea
+                        id="description"
+                        className="form-control"
+                        placeholder="請輸入產品描述"
+                        name="description"
+                        value={templateData.description}
+                        onChange={(e) => handleModalInputChange(e)}
+                      ></textarea>
+                    </div>
+                    <div className="mb-3">
+                      <label htmlFor="content" className="form-label">
+                        說明內容
+                      </label>
+                      <textarea
+                        id="content"
+                        className="form-control"
+                        placeholder="請輸入說明內容"
+                        name="content"
+                        value={templateData.content}
+                        onChange={(e) => handleModalInputChange(e)}
+                      ></textarea>
+                    </div>
+                    <div className="mb-3">
+                      <div className="form-check">
+                        <input
+                          id="is_enabled"
+                          name="is_enabled"
+                          className="form-check-input"
+                          type="checkbox"
+                          checked={templateData.is_enabled}
+                          onChange={(e) => handleModalInputChange(e)}
+                        />
+                        <label
+                          className="form-check-label"
+                          htmlFor="is_enabled"
+                        >
+                          是否啟用
+                        </label>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-outline-secondary"
-                data-bs-dismiss="modal"
-              >
-                取消
-              </button>
-              <button
-                type="button"
-                className="btn btn-primary"
-                onClick={() => updateProduct()}
-              >
-                確認
-              </button>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  取消
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => updateProduct()}
+                >
+                  確認
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </>
   );
