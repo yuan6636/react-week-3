@@ -61,7 +61,6 @@ function App() {
         origin_price: Number(templateData.origin_price),
         price: Number(templateData.price),
         is_enabled: templateData.is_enabled ? 1 : 0,
-        imageUrl: templateData.imageUrl ? templateData.imageUrl : 'https://placehold.net/400x400.png', // 新增預設圖片
         imagesUrl: templateData.imagesUrl.filter(url => url && url.trim() !== '')
       }
     };
@@ -457,6 +456,10 @@ function App() {
                           className="img-fluid"
                           src={templateData.imageUrl}
                           alt={`${templateData.title}圖片`}
+                          onError={(e) => {
+                            e.currentTarget.src =
+                              'https://yuan6636.github.io/soft-night-images/error-fallback.jpg';
+                          }}
                         />
                       )}
                     </div>
@@ -481,6 +484,10 @@ function App() {
                             className="img-fluid"
                             src={url}
                             alt={`副圖-${index}`}
+                            onError={(e) => {
+                              e.currentTarget.src =
+                                'https://yuan6636.github.io/soft-night-images/error-fallback.jpg';
+                            }}
                           />
                         )}
                       </div>
