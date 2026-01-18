@@ -224,10 +224,13 @@ function App() {
       .find((row) => row.startsWith('access_token='))
       ?.split('=')[1];
 
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = token;
-    }
-
+    if (!token) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIsAuth(false);
+      return;
+    }  
+    
+    axios.defaults.headers.common['Authorization'] = token;
     (async () => {
       try {
         await checkAdmin();
