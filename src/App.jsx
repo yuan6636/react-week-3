@@ -495,8 +495,9 @@ function App() {
                     ))}
                     <div>
                       <button
-                        className="btn btn-outline-primary btn-sm d-block w-100"
+                        className={`btn ${templateData.imagesUrl.length >= 5 ? 'btn-outline-secondary' : 'btn-outline-primary'} btn-sm d-block w-100`}
                         onClick={(e) => handleAddImage(e)}
+                        disabled={templateData.imagesUrl.length >= 5}
                       >
                         新增圖片
                       </button>
