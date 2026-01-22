@@ -231,11 +231,7 @@ function App() {
     
     axios.defaults.headers.common['Authorization'] = token;
     (async () => {
-      try {
-        await checkAdmin();
-      } catch (error) {
-        console.error(error?.response?.data?.message);
-      }
+      await checkAdmin();
     })()
   }, [])
 
@@ -439,10 +435,11 @@ function App() {
                   <div className="col-sm-4">
                     <div className="mb-2">
                       <div className="mb-3">
-                        <label htmlFor="imageUrl" className="form-label">
+                        <label htmlFor="mainImageUrl" className="form-label">
                           輸入圖片網址
                         </label>
                         <input
+                          id="mainImageUrl"
                           type="text"
                           className="form-control"
                           placeholder="請輸入圖片連結"
@@ -466,10 +463,14 @@ function App() {
                     {templateData.imagesUrl.map((url, index) => (
                       <div className="mb-2" key={index}>
                         <div className="mb-3">
-                          <label htmlFor="imageUrl" className="form-label">
+                          <label
+                            htmlFor={`subImageUrl-${index}`}
+                            className="form-label"
+                          >
                             輸入圖片網址
                           </label>
                           <input
+                            id={`subImageUrl-${index}`}
                             type="text"
                             className="form-control"
                             placeholder="請輸入圖片連結"
