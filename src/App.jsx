@@ -236,15 +236,11 @@ function App() {
   }, [])
 
   useEffect(() => {
-    if (isAuth) {
-      (async () => {
-        try {
-          await getProducts();
-        } catch (error) {
-          console.error('取得產品資料失敗: ', error?.response?.data?.message);
-        }
-      })()
-    }
+    (async () => {
+      if (isAuth) {
+        await getProducts();
+      }
+    })()
   }, [isAuth])
 
   useEffect(() => {
