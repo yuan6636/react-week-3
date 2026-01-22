@@ -76,7 +76,7 @@ function App() {
     } catch (error) {
       const errMsg = error.response?.data?.message || error.message;
       console.error(`產品${resMsg}失敗:`, errMsg);
-      alert(`產品${resMsg}失敗`);
+      alert(`產品${resMsg}失敗：\n${errMsg.join('\n')}`);
     }
   }
 
